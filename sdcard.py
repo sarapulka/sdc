@@ -18,6 +18,10 @@ SPI_NCS_0  = b'\x00\x10'
 SPI_NCS_1  = b'\x00\x20'
 
 CMD0 = b'\x40\x00\x00\x00\x00\x95'
+CMD8 = b'\x48\x00\x00\x01\xAA\x87'
+
+
+DEBUG = False
 
 
 class Sdcard:
@@ -52,15 +56,55 @@ class Sdcard:
         # Организуем цикл ожидания ответа
         for i in range(10):
             result, ans = self.uart.rw(b'\xFF')
-            print('{}. {}'.format(i, ans))        
+            if DEBUG:
+                print('{}. {}'.format(i, ans))
             if result == True:
-                print('Принят байт 0x{:02X}'.format(ord(ans)))
+                if DEBUG:
+                    print('Принят байт 0x{:02X}'.format(ord(ans)))
                 if ord(ans) == 0x01:
-                    print('Карта на месте, карта отвечает')
-                    return True
+                    if DEBUG:
+                        print('Карта на месте, карта отвечает')
+                    return True, ans
         else:
-            print('Либо нет карты, либо карта не отвечает.')
-            return False
+            if DEBUG:
+                print('Либо нет карты, либо карта не отвечает.')
+            return False, None
+
+
+    def cmd8(self):
+        """Отправляет SD-карте команду CMD8."""
+        self.uart.sendCmdToCard(CMD8)
+
+        # Организуем цикл ожидания ответа
+        for i in range(10):
+            result, ans = self.uart.rw(b'\xFF')
+            if DEBUG:
+                print('{}. {}'.format(i, ans))        
+            if result == True:
+                if DEBUG:
+                    print('Принят байт 0x{:02X}'.format(ord(ans)))
+                if ord(ans) == 0x01:
+                    if DEBUG:
+                       print('Карта на месте, карта отвечает')
+
+                    answer = []
+                    answer.append(ans)
+
+                    for j in range(5):
+                        result, ans = self.uart.rw(b'\xFF')
+                        if DEBUG:
+                            print('{}. {}'.format(i, ans))        
+                        if result == True:
+                            if DEBUG:
+                                print('Принят байт 0x{:02X}'.format(ord(ans)))
+                            answer.append(ans)
+                    
+                    return True, answer
+        else:
+            if DEBUG:
+                print('Либо нет карты, либо карта не отвечает.')
+            return False, None
+
 
 if __name__ == "__main__":
 

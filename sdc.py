@@ -24,25 +24,58 @@ if __name__ == "__main__":
     card = Sdcard(uart1)
     leds1 = Leds(uart1)
 
-    leds1.test()
+    # leds1.test()
     time.sleep(1)
-    print()
     
+    
+    print('''
+Step 1
+    Set DI and CS high and apply 74 or more clock pulses to SCLK. Without this
+    step under certain circumstances SD-card will not work. For instance, when
+    multiple SPI devices are sharing the same bus (i.e. MISO, MOSI, CS).''')
     card.preInit()
-    time.sleep(1)
-    print()
 
+    print()
+    print('Переводим сигнал NCS у SD-карты в состояние лог.0')
     card.select()
-    time.sleep(1)
     print()
 
-    if not card.cmd0():
-        print('Пхоже, что SD-карточка дохлая')
+
+    print('''
+Step 2   
+    Send CMD0 (GO_IDLE_STATE): Reset the SD card.''')
+    result, answer = card.cmd0()
+    if not result:
+        print('Похоже, что SD-карточка дохлая')
         exit()
-
-    time.sleep(1)
+    else:
+        print('CMD0 --> 0x{:02X}'.format(ord(answer)))
     print()
 
+
+    print('''
+Step 3
+    After the card enters idle state with a CMD0, send a CMD8 with argument of
+    0x000001AA and correct CRC prior to initialization process. If the CMD8 is
+    rejected with illigal command error (0x05), the card is SDC version 1 or
+    MMC version 3. If accepted, R7 response (R1(0x01) + 32-bit return value)
+    will be returned. The lower 12 bits in the return value 0x1AA means that
+    the card is SDC version 2 and it can work at voltage range of 2.7 to 3.6
+    volts. If not the case, the card should be rejected.''')
+    result, answer = card.cmd8();
+    if not result:
+        print('Похоже, что SD-карточка дохлая')
+        exit()
+    else:
+        print('CMD8 -->', end='')
+        for byte in answer:
+            print(' 0x{:02X}'.format(ord(byte)), end='')
+        print()
+    
+    
+    
+    print()
+    print('Переводим сигнал NCS у SD-карты в состояние лог.1')
     card.unselect()
     
     time.sleep(1)

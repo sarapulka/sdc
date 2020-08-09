@@ -19,6 +19,9 @@ TIMEOUT = 0.1
 import serial
 
 
+DEBUG = False
+
+
 class Uart(serial.Serial):
     """."""
 
@@ -34,10 +37,11 @@ class Uart(serial.Serial):
 
     def sendCmdToPeriph(self, command):
         """Послать команду периферии."""
-        print('Передаём команду периферии: ', end='')
-        for byte in range(len(command)):
-            print(' {:02X}'.format(command[byte]), end='')
-        print()
+        if DEBUG:
+            print('Передаём команду периферии: ', end='')
+            for byte in range(len(command)):
+                print(' {:02X}'.format(command[byte]), end='')
+            print()
         
         # Побайтная передача без байт-стаффинга
         for byte in command:
@@ -46,10 +50,11 @@ class Uart(serial.Serial):
 
     def sendCmdToCard(self, command):
         """Послать команду SD-карточке и получить ответ."""        
-        print('Передаём команду карте: ', end='')
-        for byte in range(len(command)):
-            print(' {:02X}'.format(command[byte]), end='')
-        print()
+        if DEBUG:
+            print('Передаём команду карте: ', end='')
+            for byte in range(len(command)):
+                print(' {:02X}'.format(command[byte]), end='')
+            print()
 
         # Побайтная передача с байт-стаффингом
         for byte in command:
@@ -61,14 +66,16 @@ class Uart(serial.Serial):
 
     def sendByte(self, byte):
         """Передаёт один байт без байт-стаффигна."""
-        print('Передаём один байт: 0x{:02X}'.format(ord(byte)))
+        if DEBUG:
+            print('Передаём один байт: 0x{:02X}'.format(ord(byte)))
 
         self.write(byte)
         
 
     def rw(self, byte):
         """Производит передачу и приём одного байта."""        
-        print('Производим передачу одного байта 0x{:02X} и затем сразу принимаем ответный байт'.format(ord(byte)))
+        if DEBUG:
+            print('Производим передачу одного байта 0x{:02X} и затем сразу принимаем ответный байт'.format(ord(byte)))
 
         # Передача с байт-стаффингом
         if byte == 0:
@@ -82,7 +89,8 @@ class Uart(serial.Serial):
         answer = self.read()
         if len(answer) == 1:
             # Был принят какой-то байт
-            print('  ---> 0x{:02X} '.format(ord(answer)))
+            if DEBUG:
+                print('  ---> 0x{:02X} '.format(ord(answer)))
             return True, answer
         else:
             # Время ожидания вышло, ничего не было принято
