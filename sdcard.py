@@ -32,7 +32,7 @@ class Sdcard:
         """Выдаёт 80 импульсов SCK."""
         self.unselect()
         for i in range(10):
-            self.uart.sendByte(b'\xFF')
+            self.uart.rw(b'\xFF')
             
             
     def select(self):
