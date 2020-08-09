@@ -102,6 +102,23 @@ Step 4.
 
         time.sleep(0.01)
     
+  
+    print('''
+Step 5.
+    After the initialization completed, read OCR register with CMD58 and check
+    CCS flag (bit 30). When it is set, the card is a high-capacity card known
+    as SDHC/SDXC.''')
+
+    result, answer = card.cmd58()
+    if not result:
+        print('Похоже, что SD-карточка дохлая')
+        exit()
+    else:
+        print('CMD58 -->', end='')
+        for byte in answer:
+            print(' 0x{:02X}'.format(ord(byte)), end='')
+        print()
+
     
     
     

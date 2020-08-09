@@ -127,6 +127,13 @@ class Sdcard:
         return self.getAnswer1()
     
 
+    def cmd58(self):
+        """Отправляет SD-карте команду CMD58."""
+        self.uart.sendCmdToCard(CMD58)
+        return self.getAnswer6()
+
+
+
 
 if __name__ == "__main__":
 
