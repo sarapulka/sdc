@@ -62,7 +62,7 @@ Step 3
     will be returned. The lower 12 bits in the return value 0x1AA means that
     the card is SDC version 2 and it can work at voltage range of 2.7 to 3.6
     volts. If not the case, the card should be rejected.''')
-    result, answer = card.cmd8();
+    result, answer = card.cmd8()
     if not result:
         print('Похоже, что SD-карточка дохлая')
         exit()
@@ -71,6 +71,37 @@ Step 3
         for byte in answer:
             print(' 0x{:02X}'.format(ord(byte)), end='')
         print()
+
+    
+    print('''
+Step 4.
+    And then initiate initialization with ACMD41 with HCS flag (bit 30).''')
+    for i in range(100):
+        print("  итерация {}:".format(i))
+
+        result, answer = card.cmd55()
+        if not result:
+            print('Похоже, что SD-карточка дохлая')
+            exit()
+        else:
+            print('CMD55 --> 0x{:02X}'.format(ord(answer)))
+            if ord(answer) != 0x01:
+                print("Карта плохая")
+                exit()
+
+        result, answer = card.cmd41()
+        if not result:
+            print('Похоже, что SD-карточка дохлая')
+            exit()
+        else:
+            if ord(answer) != 0x01:
+                print("Ошибка при обращении к карте\n");
+            else:
+                print('OK')
+                break
+
+        time.sleep(0.01)
+    
     
     
     
